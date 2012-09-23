@@ -71,20 +71,20 @@ func init() {
 	CapMax = Capability(capMax)
 }
 
-type CapHeader struct {
+type capHeader struct {
 	Version uint32
 	Pid     int32
 }
 
-type CapData struct {
+type capData struct {
 	Effective   uint32
 	Permitted   uint32
 	Inheritable uint32
 }
 
 type Cap struct {
-	Header CapHeader
-	Data   [LINUX_CAPABILITY_U32S_3]CapData
+	Header capHeader
+	Data   [LINUX_CAPABILITY_U32S_3]capData
 }
 
 func DropRoot(username string) (err error) {

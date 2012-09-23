@@ -4,4 +4,7 @@
 
 package caps
 
+// os/user.Lookup depends on cgo.  When cgo is disabled (for static
+// linking purposes), caps falls back to parsing /etc/passwd directly.
+// Override this behavior as desired.
 var Lookup = EtcPasswdLookup
