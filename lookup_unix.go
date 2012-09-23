@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // +build darwin freebsd linux netbsd
+// +build !cgo
 
 package caps
 
@@ -13,31 +14,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os/user"
-	"strconv"
 	"strings"
-	"syscall"
 )
-
-// Current returns the current user. 
-func Current() (*user.User, error) {
-	return lookup(syscall.Getuid(), "", false)
-}
-
-// Lookup looks up a user by username. If the user cannot be found,
-// the returned error is of type UnknownUserError.
-func Lookup(username string) (*user.User, error) {
-	return lookup(-1, username, true)
-}
-
-// LookupId looks up a user by userid. If the user cannot be found,
-// the returned error is of type UnknownUserIdError.
-func LookupId(uid string) (*user.User, error) {
-	i, e := strconv.Atoi(uid)
-	if e != nil {
-		return nil, e
-	}
-	return lookup(i, "", false)
-}
 
 const (
 	fieldUsername = iota
@@ -49,7 +27,11 @@ const (
 	fieldShell
 )
 
-func lookup(uid int, username string, lookupByName bool) (*user.User, error) {
+// EtcPasswdLookup looks up a user by username. If the user cannot be
+// found, the returned error is of type user.UnknownUserError.  This
+// differs from os/user.Lookup by parsing /etc/password directly, so
+// it doesn't need cgo support.
+func EtcPasswdLookup(username string) (*user.User, error) {
 	usernamePrefix := []byte(username)
 	usernamePrefix = append(usernamePrefix, ':')
 	etcPasswd, err := ioutil.ReadFile("/etc/passwd")
@@ -71,29 +53,25 @@ func lookup(uid int, username string, lookupByName bool) (*user.User, error) {
 		if isPrefix {
 			return nil, fmt.Errorf("passwd: line too long: '%s'", l)
 		}
-		if lookupByName {
-			if !bytes.HasPrefix(l, usernamePrefix) {
-				continue
-			}
-			fields := strings.Split(string(l), ":")
-			if len(fields) != 7 {
-				return nil, fmt.Errorf("passwd: wrong num fields: %d", len(fields))
-			}
-			u = &user.User{
-				Uid: fields[fieldUid],
-				Gid: fields[fieldGid],
-				Username: fields[fieldUsername],
-				Name: fields[fieldGecos],
-				HomeDir: fields[fieldHomeDir],
-			}
-			break
-		} else {
-			// TODO: implement...
+		if !bytes.HasPrefix(l, usernamePrefix) {
+			continue
 		}
+		fields := strings.Split(string(l), ":")
+		if len(fields) != 7 {
+			return nil, fmt.Errorf("passwd: wrong num fields: %d", len(fields))
+		}
+		u = &user.User{
+			Uid: fields[fieldUid],
+			Gid: fields[fieldGid],
+			Username: fields[fieldUsername],
+			Name: fields[fieldGecos],
+			HomeDir: fields[fieldHomeDir],
+		}
+		break
 	}
 
 	if u == nil {
-		return nil, fmt.Errorf("unknown user '%s'", username)
+		return nil, user.UnknownUserError(username)
 	}
 
 	// The pw_gecos field isn't quite standardized.  Some docs
