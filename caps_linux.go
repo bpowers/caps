@@ -87,12 +87,11 @@ type Cap struct {
 	Data   [LINUX_CAPABILITY_U32S_3]CapData
 }
 
-func DropRoot(userName, group string) (err error) {
+func DropRoot(username string) (err error) {
 	var u *user.User
-	if u, err = Lookup(userName); err != nil {
+	if u, err = Lookup(username); err != nil {
 		return
 	}
-	// getgrnam?
 
 	var uid, gid int
 	if gid, err = strconv.Atoi(u.Gid); err != nil {
