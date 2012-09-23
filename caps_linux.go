@@ -185,14 +185,14 @@ func lastCap() (last int, err error) {
 }
 
 // drop a capability from the current processes bounding set
-func CapDropBound(c Capability) error {
+func BoundingSetDrop(c Capability) error {
 	if err := prctl(syscall.PR_CAPBSET_DROP, int(c), 0, 0, 0); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CapsEmptyBoundingSet() (err error) {
+func BoundingSetEmpty() (err error) {
 	// don't bother trying to empty the capability bounding set if
 	// we're not root, as we won't have the permissions.
 
@@ -202,11 +202,11 @@ func CapsEmptyBoundingSet() (err error) {
 		return
 	}
 	for i := CapMin; i <= CapMax; i++ {
-		CapDropBound(i)
+		BoundingSetDrop(i)
 	}
 	return nil
 }
 
-func CapsDropAll() error {
-	return capset()
+func DropAllCapabilities() error {
+	 return capset()
 }
