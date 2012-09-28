@@ -1,0 +1,6 @@
+prevent core dumps (setrlimit/RLIMIT_CORE)
+filesystem namespace?
+reset path
+IFS=''
+check fds 0,1,2
+
