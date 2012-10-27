@@ -40,8 +40,6 @@ func EtcPasswdLookup(username string) (*user.User, error) {
 		return nil, err
 	}
 
-	var u *user.User
-
 	passwdReader := bufio.NewReader(bytes.NewReader(etcPasswd))
 	for {
 		l, isPrefix, err := passwdReader.ReadLine()
@@ -63,26 +61,21 @@ func EtcPasswdLookup(username string) (*user.User, error) {
 				len(fields), string(l))
 			continue
 		}
-		u = &user.User{
+
+		// The pw_gecos field isn't standardized.  Some docs
+		// say: "It is expected to be a comma separated list
+		// of personal data where the first item is the full
+		// name of the user."
+		fullName := strings.SplitN(fields[fieldGecos], ",", 2)[0]
+
+		return &user.User{
 			Uid: fields[fieldUid],
 			Gid: fields[fieldGid],
 			Username: fields[fieldUsername],
-			Name: fields[fieldGecos],
+			Name: fullName,
 			HomeDir: fields[fieldHomeDir],
-		}
-		break
+		}, nil
 	}
 
-	if u == nil {
-		return nil, user.UnknownUserError(username)
-	}
-
-	// The pw_gecos field isn't quite standardized.  Some docs
-	// say: "It is expected to be a comma separated list of
-	// personal data where the first item is the full name of the
-	// user."
-	if i := strings.Index(u.Name, ","); i >= 0 {
-		u.Name = u.Name[:i]
-	}
-	return u, nil
+	return nil, user.UnknownUserError(username)
 }
