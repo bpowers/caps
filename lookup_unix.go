@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os/user"
 	"strings"
 )
@@ -58,7 +59,9 @@ func EtcPasswdLookup(username string) (*user.User, error) {
 		}
 		fields := strings.Split(string(l), ":")
 		if len(fields) != 7 {
-			return nil, fmt.Errorf("passwd: wrong num fields: %d", len(fields))
+			log.Printf("/etc/passwd: wrong num fields (%d): %s\n",
+				len(fields), string(l))
+			continue
 		}
 		u = &user.User{
 			Uid: fields[fieldUid],
