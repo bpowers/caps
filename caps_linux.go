@@ -87,15 +87,22 @@ type Cap struct {
 	Data   [LINUX_CAPABILITY_U32S_3]capData
 }
 
-// DropRoot calls setresgid(2) and setresuid(2) to permenently revoke
-// root privileges.  The USER, LOGNAME and HOME environmental
-// variables are updated to match.
+// DropRoot is a convienence function around DropRootTo, calling
+// caps.Lookup on the username provided, and passing the result to
+// DropRootTo.
 func DropRoot(username string) (err error) {
 	var u *user.User
 	if u, err = Lookup(username); err != nil {
 		return
 	}
 
+	return DropRootTo(u)
+}
+
+// DropRootTo calls setresgid(2) and setresuid(2) to permenently
+// revoke root privileges.  The USER, LOGNAME and HOME environmental
+// variables are updated to match.
+func DropRootTo(u *user.User) (err error) {
 	var uid, gid int
 	if gid, err = strconv.Atoi(u.Gid); err != nil {
 		return
