@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin freebsd linux netbsd
 // +build !cgo
 
 package caps
@@ -79,3 +78,8 @@ func EtcPasswdLookup(username string) (*user.User, error) {
 
 	return nil, user.UnknownUserError(username)
 }
+
+// os/user.Lookup depends on cgo.  When cgo is disabled (for static
+// linking purposes), caps falls back to parsing /etc/passwd directly.
+// Override this behavior as desired.
+var Lookup = EtcPasswdLookup
