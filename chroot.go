@@ -14,7 +14,7 @@ func EnterChroot(path string) (err error) {
 	if err = syscall.Chroot(path); err != nil {
 		return
 	}
-	if err = syscall.Chroot("/"); err != nil {
+	if err = syscall.Chdir("/"); err != nil {
 		return
 	}
 	return
