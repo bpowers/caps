@@ -68,11 +68,11 @@ func EtcPasswdLookup(username string) (*user.User, error) {
 		fullName := strings.SplitN(fields[fieldGecos], ",", 2)[0]
 
 		return &user.User{
-			Uid: fields[fieldUid],
-			Gid: fields[fieldGid],
+			Uid:      fields[fieldUid],
+			Gid:      fields[fieldGid],
 			Username: fields[fieldUsername],
-			Name: fullName,
-			HomeDir: fields[fieldHomeDir],
+			Name:     fullName,
+			HomeDir:  fields[fieldHomeDir],
 		}, nil
 	}
 

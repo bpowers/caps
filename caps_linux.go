@@ -218,5 +218,5 @@ func BoundingSetEmpty() (err error) {
 }
 
 func DropAllCapabilities() error {
-	 return capset()
+	return capset()
 }
