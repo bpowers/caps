@@ -59,6 +59,9 @@ func SetupChroot(newRoot string) error {
 // pseudo-filesystems are bind mounted/hard-linked into the chroot, as
 // necessitated by the go runtime.
 //
+// If newRoot is "", only DropRootTo is called, no chroot is
+// performed.
+//
 // FIXME: drop root won't fully work until this bug is closed:
 // http://code.google.com/p/go/issues/detail?id=1435
 func DropRootAndChroot(newRoot, user string) error {
